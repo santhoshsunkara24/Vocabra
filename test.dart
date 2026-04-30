@@ -7,7 +7,7 @@ void main() async {
   final apiKey = 'YOUR_KEY_HERE'; 
   
   final model = GenerativeModel(
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-1.5-flash',
     apiKey: apiKey,
   );
 

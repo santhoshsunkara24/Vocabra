@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GeminiService {
-  static String get apiKey => dotenv.get('GEMINI_API_KEY', fallback: '');
-  // Using gemini-2.0-flash for higher free-tier quota (1,500 RPM / 1M TPM)
-  static const String baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+  static const String apiKey = "AIzaSyBSjf2CGJ6825eOAtv1rwxgQOa8XoNNEy4";
+  static const String baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
   static Future<String?> _generateContent(String prompt, {String logPrefix = "Gemini Response"}) async {
     try {
