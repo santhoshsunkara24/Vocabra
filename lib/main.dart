@@ -7,6 +7,7 @@ import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/search_screen.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -72,6 +73,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initializeApp() async {
+    await dotenv.load(fileName: ".env");
     _dictionaryService = DictionaryService();
     _dailyWordService = DailyWordService();
   }

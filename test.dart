@@ -2,11 +2,13 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'dart:io';
 
 void main() async {
-  final apiKey = 'YOUR_API_KEY_HERE'; // Replace with your key
+  // IMPORTANT: Do not hardcode your API key here if you push to GitHub.
+  // The app now uses the .env file for security.
+  final apiKey = 'YOUR_KEY_HERE'; 
   
   final model = GenerativeModel(
     model: 'gemini-3-flash-preview',
-    apiKey: 'AIzaSyDhrDNBh8OJczX-dWjcpbWanNhHkolgBwM',
+    apiKey: apiKey,
   );
 
   final prompt = 'How do you pronounce "ephemeral"? Provide ONLY the syllable breakdown (e.g. "ar · TIK · yuh · luht"). No other text.';

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'api_key.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GeminiService {
-  static const String apiKey = APIConfig.geminiKey;
+  static String get apiKey => dotenv.get('GEMINI_API_KEY', fallback: '');
   // Using gemini-2.0-flash for higher free-tier quota (1,500 RPM / 1M TPM)
   static const String baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
 
@@ -90,7 +90,10 @@ class GeminiService {
     final prompt = """
     Explain the word "$word" for a dictionary application.
     Return a JSON object with exactly these keys: "formal_definition", "simple_meaning", "usage_example".
-    Ensure all strings are valid JSON (escape quotes and newlines).
+    Strict Rules:
+    1. No trailing commas.
+    2. Escape all quotes inside strings.
+    3. Return ONLY the JSON object.
     
     Format:
     {
@@ -110,6 +113,9 @@ class GeminiService {
         if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
           jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
         }
+        
+        // Repair common JSON issues (like trailing commas)
+        jsonStr = jsonStr.replaceAll(RegExp(r',\s*([\]}])'), r'$1');
         
         final Map<String, dynamic> data = jsonDecode(jsonStr);
         return {
