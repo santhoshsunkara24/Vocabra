@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'api_key.dart';
 
 class GeminiService {
-  static const String apiKey = "AIzaSyA9XCVlnETGZcEh86KnwUY2vFD_63P9PlM";
-  // Using gemini-1.5-flash for higher free-tier quota (1,500 RPM / 1M TPM)
-  static const String baseUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent";
+  static const String apiKey = APIConfig.geminiKey;
+  // Using gemini-2.0-flash for higher free-tier quota (1,500 RPM / 1M TPM)
+  static const String baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
 
   static Future<String?> _generateContent(String prompt, {String logPrefix = "Gemini Response"}) async {
     try {
@@ -30,8 +31,9 @@ class GeminiService {
             {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"}
           ],
           "generationConfig": {
-            "temperature": 0.5,
-            "maxOutputTokens": 400,
+            "temperature": 0.4,
+            "maxOutputTokens": 500,
+            "responseMimeType": "application/json"
           }
         }),
       ).timeout(const Duration(seconds: 30));
@@ -87,27 +89,26 @@ class GeminiService {
   static Future<Map<String, String>> generateAIExtras(String word) async {
     final prompt = """
     Explain the word "$word" for a dictionary application.
-    Return a JSON object with exactly these keys:
-    1. "formal_definition": A standard, precise dictionary definition.
-    2. "simple_meaning": A very simple, easy-to-understand explanation for a child or beginner.
-    3. "usage_example": One natural-sounding example sentence using the word.
+    Return a JSON object with exactly these keys: "formal_definition", "simple_meaning", "usage_example".
+    Ensure all strings are valid JSON (escape quotes and newlines).
     
-    JSON format only:
+    Format:
     {
-      "formal_definition": "...",
-      "simple_meaning": "...",
-      "usage_example": "..."
+      "formal_definition": "precise definition",
+      "simple_meaning": "kid-friendly explanation",
+      "usage_example": "sentence using the word"
     }
     """;final text = await _generateContent(prompt, logPrefix: "AIExtras");
     
     if (text != null && text.isNotEmpty) {
       try {
-        // Clean up JSON if Gemini adds markdown blocks
+        // Robust JSON extraction
         String jsonStr = text.trim();
-        if (jsonStr.contains("```")) {
-          jsonStr = jsonStr.split("```")[1];
-          if (jsonStr.startsWith("json")) jsonStr = jsonStr.substring(4);
-          jsonStr = jsonStr.trim();
+        final firstBrace = jsonStr.indexOf('{');
+        final lastBrace = jsonStr.lastIndexOf('}');
+        
+        if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+          jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
         }
         
         final Map<String, dynamic> data = jsonDecode(jsonStr);

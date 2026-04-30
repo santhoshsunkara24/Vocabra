@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/storage_service.dart';
 import 'add_word_screen.dart';
@@ -459,7 +460,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                 constraints: const BoxConstraints(),
                               ),
                               const SizedBox(width: 8),
-                              const Icon(Icons.chevron_right_rounded, color: Colors.white24, size: 24),
+                              IconButton(
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(text: word['word'] ?? ""));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('"${word['word']}" copied to clipboard'),
+                                      behavior: SnackBarBehavior.floating,
+                                      backgroundColor: const Color(0xFF2563EB),
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.copy_rounded, color: Colors.white24, size: 20),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
                             ],
                           ),
                         ),
@@ -469,6 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

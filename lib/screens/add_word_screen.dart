@@ -135,7 +135,7 @@ class _AddWordScreenState extends State<AddWordScreen> {
       await StorageService.saveWord(wordData);
     }
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) Navigator.pop(context, true);
   }
 
   @override

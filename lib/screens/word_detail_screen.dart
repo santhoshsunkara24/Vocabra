@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/word_entry.dart';
 import '../services/storage_service.dart';
@@ -19,6 +20,20 @@ class WordDetailScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF0B0B0B),
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.copy_rounded, color: Colors.white54),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: word.word ?? ""));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('"${word.word}" copied to clipboard'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: const Color(0xFF2563EB),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.edit_rounded, color: Color(0xFF2563EB)),
             onPressed: () async {

@@ -27,6 +27,7 @@ class _SearchScreenState extends State<SearchScreen> {
   int _selectedMeaningIndex = 0;
   WordEntry? _discoveryResult;
   String _loadingMessage = "Making it simple to understand...";
+  bool _anySaved = false;
 
   final Map<String, WordEntry> _sessionCache = {};
 
@@ -211,6 +212,7 @@ class _SearchScreenState extends State<SearchScreen> {
     };
 
     await StorageService.saveWord(wordData);
+    _anySaved = true;
     await _loadSavedWords(); // Refresh local list
     
     if (mounted) {
@@ -233,7 +235,11 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0B),
       body: PopScope(
-        onPopInvoked: (didPop) => FocusScope.of(context).unfocus(),
+        canPop: true,
+        onPopInvoked: (didPop) {
+          if (didPop) return;
+          Navigator.pop(context, _anySaved);
+        },
         child: CustomScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const BouncingScrollPhysics(),
@@ -243,7 +249,11 @@ class _SearchScreenState extends State<SearchScreen> {
               pinned: false,
               backgroundColor: const Color(0xFF0B0B0B),
               elevation: 0,
-              toolbarHeight: 48, // Standard height for back button area
+              toolbarHeight: 48,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white70),
+                onPressed: () => Navigator.pop(context, _anySaved),
+              ),
             ),
             
             // Search Input Section
@@ -304,12 +314,12 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
 
             // Saved Words Header
-            if (!_isLoading && _discoveryResult == null && _savedWords.isNotEmpty)
+            if (!_isLoading && _discoveryResult == null && _filteredWords.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),
                   child: Text(
-                    _searchController.text.isEmpty ? 'Vault' : 'Results',
+                    'Results',
                     style: GoogleFonts.outfit(
                       color: const Color(0xFF2563EB).withOpacity(0.8),
                       fontSize: 11,
@@ -321,21 +331,21 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
 
             // Saved/Filtered Words List
-            if (!_isLoading && _discoveryResult == null && _savedWords.isNotEmpty)
+            if (!_isLoading && _discoveryResult == null && _filteredWords.isNotEmpty)
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final word = _searchController.text.isEmpty ? _savedWords[index] : _filteredWords[index];
-                      if (_searchController.text.isNotEmpty && index >= _filteredWords.length) return null;
+                      final word = _filteredWords[index];
+                      if (index >= _filteredWords.length) return null;
                       
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: _buildLexiResultCard(word),
                       );
                     },
-                    childCount: _searchController.text.isEmpty ? _savedWords.length : _filteredWords.length,
+                    childCount: _filteredWords.length,
                   ),
                 ),
               ),
