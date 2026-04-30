@@ -1,19 +1,31 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
 
 void main() async {
-  // IMPORTANT: Do not hardcode your API key here if you push to GitHub.
-  // The app now uses the .env file for security.
-  final apiKey = 'YOUR_KEY_HERE'; 
+  // Load environment variables from .env file
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print("❌ Could not load .env file. Make sure it exists in the root directory.");
+    return;
+  }
+
+  final apiKey = dotenv.get('GEMINI_API_KEY', fallback: '');
   
+  if (apiKey.isEmpty) {
+    print("❌ GEMINI_API_KEY not found in .env file.");
+    return;
+  }
+
   final model = GenerativeModel(
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     apiKey: apiKey,
   );
 
   final prompt = 'How do you pronounce "ephemeral"? Provide ONLY the syllable breakdown (e.g. "ar · TIK · yuh · luht"). No other text.';
   
-  print('--- Testing Gemini 3 Flash Preview ---');
+  print('--- Testing Gemini 2.5 Flash ---');
   try {
     final content = [Content.text(prompt)];
     final response = await model.generateContent(content);

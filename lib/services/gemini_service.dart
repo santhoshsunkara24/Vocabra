@@ -4,16 +4,18 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GeminiService {
   static String get apiKey => dotenv.get('GEMINI_API_KEY', fallback: '');
-  static const String baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+  static const String baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
   static Future<String?> _generateContent(String prompt, {String logPrefix = "Gemini Response"}) async {
     try {
+      if (apiKey.isEmpty) {
+        print("⚠️ Gemini Error: API Key is empty! Check your .env file.");
+      }
       print("🧠 Gemini Request [$logPrefix] prompt length: ${prompt.length}");
       final response = await http.post(
-        Uri.parse(baseUrl),
+        Uri.parse("$baseUrl?key=$apiKey"),
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey.trim(),
         },
         body: jsonEncode({
           "contents": [
